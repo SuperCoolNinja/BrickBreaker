@@ -25,11 +25,11 @@ internal class Paddle : Entity
         _screenWidth = Raylib.GetScreenWidth();
         _screenHeight = Raylib.GetScreenHeight();
 
-        _width = 60;
+        _width = 70;
         _height = 10;
         _pos.X = _screenWidth / 2 - _width / 2;
         _pos.Y = _screenHeight - _height * 2;
-        _speed = 1200f;
+        _speed = 1400f;
     }
 
 

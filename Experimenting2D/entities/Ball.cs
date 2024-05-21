@@ -1,8 +1,6 @@
 ﻿using Experimenting2D.entities.@base;
 using Raylib_cs;
 using System.Numerics;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
 
 namespace Experimenting2D.entities
 {
@@ -19,9 +17,10 @@ namespace Experimenting2D.entities
         private int _targetWidth;
         private int _targetHeight;
 
-        private Paddle _paddle;
+        const float SPEED = 350f;
 
-        private bool _playerLoose = false;
+
+        private Paddle _paddle;
 
         public Ball(Paddle paddle)
         {
@@ -47,12 +46,11 @@ namespace Experimenting2D.entities
         {
             base.Update(deltaTime);
 
-            const float speed = 250f;
 
-            float nextPosX = _pos.X + _dir.X * speed * deltaTime;
-            float nextPosY = _pos.Y + _dir.Y * speed * deltaTime;
+            float nextPosX = _pos.X + _dir.X * SPEED * deltaTime;
+            float nextPosY = _pos.Y + _dir.Y * SPEED * deltaTime;
 
-            if (nextPosX <= 0 || nextPosX >= _screenWidth - RADIUS)
+            if (nextPosX <= 5 || nextPosX >= _screenWidth - RADIUS)
                 _dir.X *= -1;
 
             if (nextPosY <= 0)

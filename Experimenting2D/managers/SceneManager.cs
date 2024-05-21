@@ -6,7 +6,6 @@ namespace Experimenting2D.managers;
 /// <summary>
 /// This class represent the scene manager where we can add new scenes, loadscene, 
 /// </summary>
-
 internal class SceneManager
 {
     private Dictionary<string, Scene> _scenes;
