@@ -36,6 +36,14 @@ internal class SceneManager
         }
     }
 
+    public Scene? GetCurrentScene()
+    {
+        if (_currentScene is not null)
+            return _currentScene;
+
+        return null;
+    }
+
     public void Update(float deltaTime)
     {
         if (_currentScene is not null)

@@ -23,5 +23,7 @@ public abstract class Scene
     public virtual void Draw() { }
     public virtual void Start() { }
 
+    public virtual bool HasPlayerLost() => false;
+
     protected abstract List<(int X, int Y)> GenerateTargetPositions();
 }

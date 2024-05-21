@@ -2,28 +2,21 @@
 using Experimenting2D.managers;
 using Experimenting2D.scenes;
 using Raylib_cs;
-using System.Diagnostics;
 
 namespace Experimenting2D;
 
 internal class Game
 {
-    private Stopwatch _stopwatch;
-    private float _deltaTime;
-    private float _timeSinceLastUpdate;
-    private float _updateInterval;
-
     private SceneManager _sceneManager;
+    private bool _endGame = false;
+
 
     public void Run()
     {
         Raylib.InitWindow(GameConfig.ScreenWidth, GameConfig.ScreenHeight, GameConfig.Title);
+
+        // Optionally, set a target FPS, but VSync will typically override this
         Raylib.SetTargetFPS(GameConfig.TargetFPS);
-
-        _stopwatch = new Stopwatch();
-        _stopwatch.Start();
-        _updateInterval = 1.0f / GameConfig.TargetFPS;
-
 
         _sceneManager = new SceneManager();
         _sceneManager.AddScene("first level", new SceneOne());
@@ -42,16 +35,23 @@ internal class Game
 
     private void Update()
     {
-        float elapsedTime = (float)_stopwatch.Elapsed.TotalSeconds;
-        _stopwatch.Restart();
-        _deltaTime = elapsedTime;
+        float deltaTime = Raylib.GetFrameTime();
 
-        _timeSinceLastUpdate += _deltaTime;
-
-        if (_timeSinceLastUpdate >= _updateInterval)
+        if (_endGame)
         {
-            _sceneManager.Update(_timeSinceLastUpdate);
-            _timeSinceLastUpdate = 0.0f;
+            Raylib.DrawText("PRESS R TO RESTART", Raylib.GetScreenWidth() / 2 - 100, Raylib.GetScreenHeight() / 2 - 12, 24, Color.Red);
+
+            if (Raylib.IsKeyPressed(KeyboardKey.R))
+            {
+                _sceneManager.LoadScene("first level");
+                _sceneManager.Start();
+                _endGame = false;
+            }
+        }
+        else
+        {
+            _sceneManager.Update(deltaTime);
+            _endGame = CheckPlayerLost();
         }
     }
 
@@ -63,5 +63,17 @@ internal class Game
         _sceneManager.Draw();
 
         Raylib.EndDrawing();
+    }
+
+    private bool CheckPlayerLost()
+    {
+        if (_sceneManager.GetCurrentScene() is null)
+            return false;
+
+        Scene scene = _sceneManager.GetCurrentScene();
+        if (scene != null)
+            return scene.HasPlayerLost();
+
+        return false;
     }
 }

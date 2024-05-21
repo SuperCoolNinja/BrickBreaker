@@ -1,15 +1,12 @@
 ﻿using Experimenting2D.entities;
+using Experimenting2D.scenes;
 using Raylib_cs;
 
-namespace Experimenting2D.scenes;
-
-/// <summary>
-/// Represents the first scene of the game.
-/// </summary>
 internal class SceneOne : Scene
 {
     private Paddle _paddle;
     private Target _target;
+    private Ball _ball;
 
     private const int ROWS = 8;
     private const int COLS = 8;
@@ -22,6 +19,7 @@ internal class SceneOne : Scene
         base.Load();
 
         _paddle = new Paddle();
+        _ball = new Ball(_paddle);
         _target = new Target(WIDTH, HEIGHT);
     }
 
@@ -37,7 +35,9 @@ internal class SceneOne : Scene
         _target.Start();
 
         var targetPositions = GenerateTargetPositions();
+
         _target.SetPositions(targetPositions);
+        _ball.SetTargetPositions(targetPositions, WIDTH, HEIGHT);
     }
 
     public override void Update(float deltaTime)
@@ -46,6 +46,12 @@ internal class SceneOne : Scene
 
         _paddle.Update(deltaTime);
         _target.Update(deltaTime);
+        _ball.Update(deltaTime);
+    }
+
+    public override bool HasPlayerLost()
+    {
+        return _ball.IsBallOutOfZone();
     }
 
     public override void Draw()
@@ -54,6 +60,7 @@ internal class SceneOne : Scene
 
         _paddle.Draw();
         _target.Draw();
+        _ball.Draw();
     }
 
     protected override List<(int X, int Y)> GenerateTargetPositions()
@@ -76,7 +83,6 @@ internal class SceneOne : Scene
                 positions.Add((posX, posY));
             }
         }
-
 
         return positions;
     }

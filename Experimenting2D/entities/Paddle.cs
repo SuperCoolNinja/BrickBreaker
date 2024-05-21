@@ -12,17 +12,23 @@ internal class Paddle : Entity
 {
     private int _width;
     private int _height;
-
     private float _speed;
+
+    private int _screenWidth;
+    private int _screenHeight;
+
 
     private Vector2 _pos;
 
     public Paddle()
     {
+        _screenWidth = Raylib.GetScreenWidth();
+        _screenHeight = Raylib.GetScreenHeight();
+
         _width = 60;
         _height = 10;
-        _pos.X = Raylib.GetScreenWidth() / 2 - _width / 2;
-        _pos.Y = Raylib.GetScreenHeight() - _height * 2;
+        _pos.X = _screenWidth / 2 - _width / 2;
+        _pos.Y = _screenHeight - _height * 2;
         _speed = 1200f;
     }
 
@@ -44,7 +50,9 @@ internal class Paddle : Entity
         if (isMovingRight && CanPaddleMoveRight())
             _pos.X += 1 * _speed * deltaTime;
     }
+    public Vector2 GetPos() => _pos;
+    public int GetWidth() => _width;
 
-    private bool CanPaddleMoveLeft() => _pos.X > 0;
-    private bool CanPaddleMoveRight() => _pos.X < Raylib.GetScreenWidth() - _width;
+    private bool CanPaddleMoveLeft() => _pos.X > 13;
+    private bool CanPaddleMoveRight() => _pos.X < _screenWidth - _width * 1.39;
 }
