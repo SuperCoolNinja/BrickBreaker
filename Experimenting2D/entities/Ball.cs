@@ -81,7 +81,7 @@ namespace Experimenting2D.entities
                 if (IsCollidingWithTarget(targetPos))
                 {
                     _targetPositions.RemoveAt(i);
-                    _dir.Y *= -1;
+                    //_dir.Y *= -1;
                     break;
                 }
             }
