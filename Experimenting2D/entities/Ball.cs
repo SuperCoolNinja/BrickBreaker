@@ -46,7 +46,6 @@ namespace Experimenting2D.entities
         {
             base.Update(deltaTime);
 
-
             float nextPosX = _pos.X + _dir.X * SPEED * deltaTime;
             float nextPosY = _pos.Y + _dir.Y * SPEED * deltaTime;
 
@@ -103,7 +102,7 @@ namespace Experimenting2D.entities
 
         public bool IsBallOutOfZone()
         {
-            return _pos.Y >= _screenHeight - RADIUS;
+            return _pos.Y > _screenHeight - RADIUS;
         }
 
         private bool IsCollidingWithPaddle()

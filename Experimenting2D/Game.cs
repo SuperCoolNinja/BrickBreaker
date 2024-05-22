@@ -8,8 +8,8 @@ namespace Experimenting2D;
 internal class Game
 {
     private SceneManager _sceneManager;
-    private bool _endGame = false;
-
+    private bool _playerLoose = false;
+    private bool _canGoNextLevel = false;
 
     public void Run()
     {
@@ -20,6 +20,8 @@ internal class Game
 
         _sceneManager = new SceneManager();
         _sceneManager.AddScene("first level", new SceneOne());
+        _sceneManager.AddScene("second level", new SceneTwo());
+
         _sceneManager.LoadScene("first level");
 
         _sceneManager.Start();
@@ -37,21 +39,32 @@ internal class Game
     {
         float deltaTime = Raylib.GetFrameTime();
 
-        if (_endGame)
+        if (_canGoNextLevel)
+        {
+            if (!_sceneManager.IsLastScene())
+            {
+                _sceneManager.LoadNextScene();
+                _sceneManager.Start();
+            }
+            _canGoNextLevel = false;
+        }
+
+        if (_playerLoose)
         {
             Raylib.DrawText("PRESS R TO RESTART", Raylib.GetScreenWidth() / 2 - 100, Raylib.GetScreenHeight() / 2 - 12, 24, Color.Red);
 
             if (Raylib.IsKeyPressed(KeyboardKey.R))
             {
-                _sceneManager.LoadScene("first level");
+                _sceneManager.ReloadCurrentScene();
                 _sceneManager.Start();
-                _endGame = false;
+                _playerLoose = false;
             }
         }
         else
         {
             _sceneManager.Update(deltaTime);
-            _endGame = CheckPlayerLost();
+            _playerLoose = CheckPlayerLost();
+            _canGoNextLevel = CheckPlayerWon();
         }
     }
 
@@ -73,6 +86,18 @@ internal class Game
         Scene scene = _sceneManager.GetCurrentScene();
         if (scene != null)
             return scene.HasPlayerLost();
+
+        return false;
+    }
+
+    private bool CheckPlayerWon()
+    {
+        Scene? scene = _sceneManager.GetCurrentScene();
+
+        if (scene != null)
+        {
+            return scene.HasDestroyAllTarget();
+        }
 
         return false;
     }

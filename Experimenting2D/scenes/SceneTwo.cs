@@ -2,7 +2,7 @@
 using Experimenting2D.scenes;
 using Raylib_cs;
 
-internal class SceneOne : Scene
+internal class SceneTwo : Scene
 {
     private Paddle _paddle;
     private Target _target;
@@ -54,8 +54,6 @@ internal class SceneOne : Scene
         return _ball.IsBallOutOfZone();
     }
 
-
-
     public override void Draw()
     {
         base.Draw();
@@ -70,17 +68,25 @@ internal class SceneOne : Scene
         var positions = new List<(int X, int Y)>();
 
         int screenWidth = Raylib.GetScreenWidth();
+        int screenHeight = Raylib.GetScreenHeight();
+
 
         int totalGridWidth = COLS * WIDTH + (COLS - 1) * 2;
+        int totalGridHeight = ROWS * HEIGHT + (ROWS - 1) * 2;
+
 
         int offsetX = (screenWidth - totalGridWidth) / 2;
-        int offsetY = 2;
+        int offsetY = (screenHeight - totalGridHeight) / 2;
 
         for (int r = 0; r < ROWS; r++)
         {
-            for (int c = 0; c < COLS; c++)
+            int numColsInRow = COLS - r;
+
+            int rowOffsetX = offsetX + (totalGridWidth - (numColsInRow * WIDTH + (numColsInRow - 1) * 2)) / 2;
+
+            for (int c = 0; c < numColsInRow; c++)
             {
-                int posX = offsetX + c * (WIDTH + 2);
+                int posX = rowOffsetX + c * (WIDTH + 2);
                 int posY = offsetY + r * (HEIGHT + 2);
                 positions.Add((posX, posY));
             }

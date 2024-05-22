@@ -25,5 +25,7 @@ public abstract class Scene
 
     public virtual bool HasPlayerLost() => false;
 
+    public virtual bool HasDestroyAllTarget() => false;
+
     protected abstract List<(int X, int Y)> GenerateTargetPositions();
 }

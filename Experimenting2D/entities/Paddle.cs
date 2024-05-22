@@ -29,7 +29,7 @@ internal class Paddle : Entity
         _height = 10;
         _pos.X = _screenWidth / 2 - _width / 2;
         _pos.Y = _screenHeight - _height * 2;
-        _speed = 1400f;
+        _speed = 1000f;
     }
 
 
@@ -53,6 +53,6 @@ internal class Paddle : Entity
     public Vector2 GetPos() => _pos;
     public int GetWidth() => _width;
 
-    private bool CanPaddleMoveLeft() => _pos.X > 13;
-    private bool CanPaddleMoveRight() => _pos.X < _screenWidth - _width * 1.39;
+    private bool CanPaddleMoveLeft() => _pos.X > 0;
+    private bool CanPaddleMoveRight() => _pos.X < _screenWidth - _width;
 }

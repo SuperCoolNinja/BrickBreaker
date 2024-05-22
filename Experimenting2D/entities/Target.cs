@@ -36,6 +36,11 @@ internal class Target : Entity
         _positions = positions;
     }
 
+    public List<(int X, int Y)> GetPositions()
+    {
+        return _positions;
+    }
+
     public override void Update(float deltaTime)
     {
         base.Update(deltaTime);
