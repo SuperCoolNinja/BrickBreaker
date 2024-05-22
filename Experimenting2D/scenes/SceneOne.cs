@@ -8,8 +8,8 @@ internal class SceneOne : Scene
     private Target _target;
     private Ball _ball;
 
-    private const int ROWS = 12;
-    private const int COLS = 12;
+    private const int ROWS = 10;
+    private const int COLS = 10;
 
     private const int WIDTH = 80;
     private const int HEIGHT = 15;
@@ -80,8 +80,8 @@ internal class SceneOne : Scene
         {
             for (int c = 0; c < COLS; c++)
             {
-                int posX = offsetX + c * (WIDTH + 2);
-                int posY = offsetY + r * (HEIGHT + 2);
+                int posX = offsetX + c * (WIDTH + 1);
+                int posY = offsetY + r * (HEIGHT + 1);
                 positions.Add((posX, posY));
             }
         }

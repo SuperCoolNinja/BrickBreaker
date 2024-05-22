@@ -28,7 +28,7 @@ internal class Target : Entity
 
         foreach (var position in _positions)
         {
-            Raylib.DrawRectangle(position.X, position.Y, _width, _height, Color.Blue);
+            Raylib.DrawRectangle(position.X, position.Y, _width, _height, Color.LightGray);
         }
     }
     public void SetPositions(List<(int X, int Y)> positions)

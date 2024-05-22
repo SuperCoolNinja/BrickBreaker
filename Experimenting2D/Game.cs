@@ -1,7 +1,9 @@
 ﻿using Experimenting2D.config;
+using Experimenting2D.entities;
 using Experimenting2D.managers;
 using Experimenting2D.scenes;
 using Raylib_cs;
+using System.Numerics;
 
 namespace Experimenting2D;
 
@@ -31,6 +33,8 @@ internal class Game
             Update();
             Draw();
         }
+
+
 
         Raylib.CloseWindow();
     }
@@ -71,7 +75,7 @@ internal class Game
     private void Draw()
     {
         Raylib.BeginDrawing();
-        Raylib.ClearBackground(Color.Black);
+        Raylib.ClearBackground(new Color(91, 120, 228, 255));
 
         _sceneManager.Draw();
 

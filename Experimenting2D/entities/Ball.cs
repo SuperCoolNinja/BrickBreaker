@@ -19,6 +19,8 @@ namespace Experimenting2D.entities
 
         const float SPEED = 350f;
 
+        List<Particle> particles = new List<Particle>();
+        Random random = new Random();
 
         private Paddle _paddle;
 
@@ -36,10 +38,15 @@ namespace Experimenting2D.entities
             _paddle = paddle;
         }
 
+
         public override void Draw()
         {
             base.Draw();
+
             Raylib.DrawCircle((int)_pos.X, (int)_pos.Y, RADIUS, Color.White);
+
+            foreach (var particle in particles)
+                particle.Draw();
         }
 
         public override void Update(float deltaTime)
@@ -60,6 +67,11 @@ namespace Experimenting2D.entities
 
             CheckCollisionWithTargets();
             CheckCollisionWithPaddle();
+
+            foreach (var particle in particles)
+                particle.Update();
+
+            particles.RemoveAll(p => p.Alpha <= 0);
         }
 
         public void SetTargetPositions(List<(int X, int Y)> targetPositions, int targetWidth, int targetHeight)
@@ -97,6 +109,7 @@ namespace Experimenting2D.entities
                 float paddleCenter = _paddle.GetPos().X + _paddle.GetWidth() / 2;
                 float hitPos = (_pos.X - paddleCenter) / (_paddle.GetWidth() / 2);
                 _dir.X = hitPos;
+                CreateSmoke(_pos, particles, random);
             }
         }
 
@@ -111,6 +124,18 @@ namespace Experimenting2D.entities
                    _pos.Y + RADIUS > _paddle.GetPos().Y && _pos.Y - RADIUS < _paddle.GetPos().Y + _paddle.GetWidth();
         }
 
+        private void CreateSmoke(Vector2 paddlePosition, List<Particle> particles, Random random)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                float size = (float)random.NextDouble() * 3 + 2;
+                Vector2 position = new Vector2(paddlePosition.X, paddlePosition.Y + _paddle.GetHeight() / 2);
+                float angle = (float)random.NextDouble() * MathF.PI * 2;
+                float speed = (float)random.NextDouble() * 2 + 3;
+                Vector2 velocity = new Vector2(MathF.Cos(angle) * speed, MathF.Sin(angle) / 2 * speed);
+                particles.Add(new Particle(position, velocity, size));
+            }
+        }
 
         // Thanks to gpt for that collision with the target pos check :
         private bool IsCollidingWithTarget((int X, int Y) targetPos)
