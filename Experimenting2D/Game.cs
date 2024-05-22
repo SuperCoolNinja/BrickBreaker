@@ -5,104 +5,166 @@ using Experimenting2D.scenes;
 using Raylib_cs;
 using System.Numerics;
 
-namespace Experimenting2D;
-
-internal class Game
+namespace Experimenting2D
 {
-    private SceneManager _sceneManager;
-    private bool _playerLoose = false;
-    private bool _canGoNextLevel = false;
-
-    public void Run()
+    internal class Game
     {
-        Raylib.InitWindow(GameConfig.ScreenWidth, GameConfig.ScreenHeight, GameConfig.Title);
+        private SceneManager _sceneManager;
+        private bool _playerLoose = false;
+        private bool _canGoNextLevel = false;
+        private bool _isPaused = false;
+        private Font _boldFont;
 
-        // Optionally, set a target FPS, but VSync will typically override this
-        Raylib.SetTargetFPS(GameConfig.TargetFPS);
-
-        _sceneManager = new SceneManager();
-        _sceneManager.AddScene("first level", new SceneOne());
-        _sceneManager.AddScene("second level", new SceneTwo());
-
-        _sceneManager.LoadScene("first level");
-
-        _sceneManager.Start();
-
-        while (!Raylib.WindowShouldClose())
+        public void Run()
         {
-            Update();
-            Draw();
-        }
+            Raylib.InitWindow(GameConfig.ScreenWidth, GameConfig.ScreenHeight, GameConfig.Title);
+            Raylib.SetTargetFPS(GameConfig.TargetFPS);
 
+            // Load a custom bold font
+            _boldFont = Raylib.LoadFont("resources/fonts/bold.ttf");
 
+            _sceneManager = new SceneManager();
+            _sceneManager.AddScene("first level", new SceneOne());
+            _sceneManager.AddScene("second level", new SceneTwo());
 
-        Raylib.CloseWindow();
-    }
+            _sceneManager.LoadScene("first level");
 
-    private void Update()
-    {
-        float deltaTime = Raylib.GetFrameTime();
+            _sceneManager.Start();
 
-        if (_canGoNextLevel)
-        {
-            if (!_sceneManager.IsLastScene())
+            while (!Raylib.WindowShouldClose())
             {
-                _sceneManager.LoadNextScene();
-                _sceneManager.Start();
+                if (!Raylib.IsWindowFocused())
+                {
+                    _isPaused = true;
+                }
+
+                Update();
+                Draw();
             }
-            _canGoNextLevel = false;
+
+            Raylib.UnloadFont(_boldFont);
+            Raylib.CloseWindow();
         }
 
-        if (_playerLoose)
+        private void Update()
         {
-            Raylib.DrawText("PRESS R TO RESTART", Raylib.GetScreenWidth() / 2 - 100, Raylib.GetScreenHeight() / 2 - 12, 24, Color.Red);
-
-            if (Raylib.IsKeyPressed(KeyboardKey.R))
+            if (_isPaused)
             {
-                _sceneManager.ReloadCurrentScene();
-                _sceneManager.Start();
-                _playerLoose = false;
+                if (Raylib.IsWindowFocused())
+                {
+                    _isPaused = false;
+                }
+                return;
+            }
+
+            float deltaTime = Raylib.GetFrameTime();
+
+            if (_canGoNextLevel)
+            {
+                if (!_sceneManager.IsLastScene())
+                {
+                    _sceneManager.LoadNextScene();
+                    _sceneManager.Start();
+                }
+                _canGoNextLevel = false;
+            }
+
+            if (_playerLoose)
+            {
+                if (Raylib.IsKeyPressed(KeyboardKey.R))
+                {
+                    _sceneManager.ReloadCurrentScene();
+                    _sceneManager.Start();
+                    _playerLoose = false;
+                }
+            }
+            else
+            {
+                _sceneManager.Update(deltaTime);
+                _playerLoose = CheckPlayerLost();
+                _canGoNextLevel = CheckPlayerWon();
             }
         }
-        else
+
+        private void Draw()
         {
-            _sceneManager.Update(deltaTime);
-            _playerLoose = CheckPlayerLost();
-            _canGoNextLevel = CheckPlayerWon();
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(new Color(91, 120, 228, 255));
+
+            _sceneManager.Draw();
+
+            if (_playerLoose)
+            {
+                DrawRestartText();
+            }
+
+            if (_isPaused)
+            {
+                DrawPausedText();
+            }
+
+            Raylib.EndDrawing();
         }
-    }
 
-    private void Draw()
-    {
-        Raylib.BeginDrawing();
-        Raylib.ClearBackground(new Color(91, 120, 228, 255));
+        private void DrawRestartText()
+        {
+            string message = "PRESS R TO RESTART";
+            float fontSize = 24;
+            float textWidth = Raylib.MeasureTextEx(_boldFont, message, fontSize, 1f).X;
 
-        _sceneManager.Draw();
+            int screenWidth = Raylib.GetScreenWidth();
+            int screenHeight = Raylib.GetScreenHeight();
+            int posX = screenWidth / 2 - (int)textWidth / 2;
+            int posY = screenHeight / 2 - (int)fontSize / 2;
 
-        Raylib.EndDrawing();
-    }
+            // Draw the semi-transparent background
+            int padding = 10;
+            Raylib.DrawRectangle(posX - padding, posY - padding, (int)textWidth + padding * 2, (int)fontSize + padding * 2, new Color(0, 0, 0, 200));
 
-    private bool CheckPlayerLost()
-    {
-        if (_sceneManager.GetCurrentScene() is null)
+            // Draw the text
+            Raylib.DrawTextEx(_boldFont, message, new Vector2(posX, posY), fontSize, 1, Color.Red);
+        }
+
+        private void DrawPausedText()
+        {
+            string message = "PAUSED";
+            float fontSize = 24;
+            float textWidth = Raylib.MeasureTextEx(_boldFont, message, fontSize, 1f).X;
+
+            int screenWidth = Raylib.GetScreenWidth();
+            int screenHeight = Raylib.GetScreenHeight();
+            int posX = screenWidth / 2 - (int)textWidth / 2;
+            int posY = screenHeight / 2 - (int)fontSize / 2;
+
+            // Draw the semi-transparent background
+            int padding = 10;
+            Raylib.DrawRectangle(posX - padding, posY - padding, (int)textWidth + padding * 2, (int)fontSize + padding * 2, new Color(0, 0, 0, 200));
+
+            // Draw the text
+            Raylib.DrawTextEx(_boldFont, message, new Vector2(posX, posY), fontSize, 1, Color.Red);
+        }
+
+        private bool CheckPlayerLost()
+        {
+            if (_sceneManager.GetCurrentScene() is null)
+                return false;
+
+            Scene scene = _sceneManager.GetCurrentScene();
+            if (scene != null)
+                return scene.HasPlayerLost();
+
             return false;
-
-        Scene scene = _sceneManager.GetCurrentScene();
-        if (scene != null)
-            return scene.HasPlayerLost();
-
-        return false;
-    }
-
-    private bool CheckPlayerWon()
-    {
-        Scene? scene = _sceneManager.GetCurrentScene();
-
-        if (scene != null)
-        {
-            return scene.HasDestroyAllTarget();
         }
 
-        return false;
+        private bool CheckPlayerWon()
+        {
+            Scene scene = _sceneManager.GetCurrentScene();
+            if (scene != null)
+            {
+                return scene.HasDestroyAllTarget();
+            }
+
+            return false;
+        }
     }
 }
