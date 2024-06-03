@@ -1,87 +1,90 @@
-﻿using Experimenting2D.entities.@base;
+﻿using Experimenting2D.config;
+using Experimenting2D.entities.@base;
 using Raylib_cs;
+using System;
+using System.Collections.Generic;
 using System.Numerics;
 
-namespace Experimenting2D.entities;
-
-
-/// <summary>
-/// Represents a paddle entity in the game.
-/// </summary>
-internal class Paddle : Entity
+namespace Experimenting2D.entities
 {
-    private int _width;
-    private int _height;
-    private float _speed;
-
-    private int _screenWidth;
-    private int _screenHeight;
-
-
-    List<Particle> particles = new List<Particle>();
-    Random random = new Random();
-
-    private Vector2 _pos;
-
-    public Paddle()
+    /// <summary>
+    /// Represents a paddle entity in the game.
+    /// </summary>
+    internal class Paddle : Entity
     {
-        _screenWidth = Raylib.GetScreenWidth();
-        _screenHeight = Raylib.GetScreenHeight();
+        private float _speed;
 
-        _width = 70;
-        _height = 10;
-        _pos.X = _screenWidth / 2 - _width / 2;
-        _pos.Y = _screenHeight - _height * 2;
-        _speed = 1000f;
-    }
+        private int _screenWidth;
+        private int _screenHeight;
 
+        List<Particle> particles = new List<Particle>();
+        Random random = new Random();
 
-    public override void Draw()
-    {
-        Raylib.DrawRectangle((int)_pos.X, (int)_pos.Y, _width, _height, Color.RayWhite);
+        private Vector2 _pos;
 
-        foreach (var particle in particles)
-            particle.Draw();
-    }
-
-
-
-    public override void Update(float deltaTime)
-    {
-        bool isMovingLeft = Raylib.IsKeyDown(KeyboardKey.Left) || Raylib.IsKeyDown(KeyboardKey.A) || Raylib.IsKeyDown(KeyboardKey.Q);
-        bool isMovingRight = Raylib.IsKeyDown(KeyboardKey.Right) || Raylib.IsKeyDown(KeyboardKey.D);
-
-
-        if (isMovingLeft && CanPaddleMoveLeft())
+        public Paddle()
         {
-            _pos.X -= 1 * _speed * deltaTime;
-            CreateSmoke(_pos, particles, random);
+            _screenWidth = Raylib.GetScreenWidth();
+            _screenHeight = Raylib.GetScreenHeight();
+
+            _pos.X = _screenWidth / 2 - GameConfig.PaddleTexture.Width / 2;
+            _pos.Y = _screenHeight - GameConfig.PaddleTexture.Height;
+
+            Console.WriteLine("HEIGHT" + GameConfig.PaddleTexture.Height);
+            _speed = 1000f;
         }
 
-        if (isMovingRight && CanPaddleMoveRight())
+        public override void Draw()
         {
-            _pos.X += 1 * _speed * deltaTime;
-            CreateSmoke(_pos, particles, random);
+            Raylib.DrawTexture(GameConfig.PaddleTexture, (int)_pos.X, (int)_pos.Y, Color.White);
+
+            // Draw particles
+            foreach (var particle in particles)
+                particle.Draw();
         }
 
-        foreach (var particle in particles)
-            particle.Update();
+        public override void Update(float deltaTime)
+        {
+            bool isMovingLeft = Raylib.IsKeyDown(KeyboardKey.Left) || Raylib.IsKeyDown(KeyboardKey.A) || Raylib.IsKeyDown(KeyboardKey.Q);
+            bool isMovingRight = Raylib.IsKeyDown(KeyboardKey.D) || Raylib.IsKeyDown(KeyboardKey.Right);
 
-        particles.RemoveAll(p => p.Alpha <= 0);
-    }
-    public Vector2 GetPos() => _pos;
-    public int GetWidth() => _width;
+            if (isMovingLeft && CanPaddleMoveLeft())
+            {
+                _pos.X -= _speed * deltaTime;
+                CreateSmoke(_pos, particles, random);
+            }
 
-    public int GetHeight() => _height;
+            if (isMovingRight && CanPaddleMoveRight())
+            {
+                _pos.X += _speed * deltaTime;
+                CreateSmoke(_pos, particles, random);
+            }
 
-    private bool CanPaddleMoveLeft() => _pos.X > 0;
-    private bool CanPaddleMoveRight() => _pos.X < _screenWidth - _width;
+            if (_pos.X < 0)
+                _pos.X = 0;
 
-    private void CreateSmoke(Vector2 paddlePosition, List<Particle> particles, Random random)
-    {
-        float size = (float)random.NextDouble() * 1 + 1;
-        Vector2 position = new Vector2(paddlePosition.X + (float)random.NextDouble() * 1 - 5, paddlePosition.Y);
-        Vector2 velocity = new Vector2((float)random.NextDouble() * 1 - 1, (float)random.NextDouble() * 6 - 3);
-        particles.Add(new Particle(position, velocity, size));
+            if (_pos.X > _screenWidth - GameConfig.PaddleTexture.Width)
+                _pos.X = _screenWidth - GameConfig.PaddleTexture.Width;
+
+            foreach (var particle in particles)
+                particle.Update();
+
+            particles.RemoveAll(p => p.Alpha <= 0);
+        }
+
+        public Vector2 GetPos() => _pos;
+        public int GetWidth() => GameConfig.PaddleTexture.Width;
+        public int GetHeight() => GameConfig.PaddleTexture.Height;
+
+        private bool CanPaddleMoveLeft() => _pos.X > 0;
+        private bool CanPaddleMoveRight() => _pos.X < _screenWidth - GameConfig.PaddleTexture.Width;
+
+        private void CreateSmoke(Vector2 paddlePosition, List<Particle> particles, Random random)
+        {
+            float size = (float)random.NextDouble() * 1 + 1;
+            Vector2 position = new Vector2(paddlePosition.X + (float)random.NextDouble() * 1 - 5, paddlePosition.Y);
+            Vector2 velocity = new Vector2((float)random.NextDouble() * 1 - 1, (float)random.NextDouble() * 6 - 3);
+            particles.Add(new Particle(position, velocity, size));
+        }
     }
 }

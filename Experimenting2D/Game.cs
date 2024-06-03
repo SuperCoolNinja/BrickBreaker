@@ -3,6 +3,7 @@ using Experimenting2D.entities;
 using Experimenting2D.managers;
 using Experimenting2D.scenes;
 using Raylib_cs;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace Experimenting2D
@@ -23,11 +24,22 @@ namespace Experimenting2D
             // Load a custom bold font
             _boldFont = Raylib.LoadFont("resources/fonts/bold.ttf");
 
+            // Charger l'image du paddle
+            Image paddleImage = Raylib.LoadImage(GameConfig.PADDLE_TEXTURE);
+            // Redimensionner l'image du paddle
+            Raylib.ImageResize(ref paddleImage, 85, 20);
+            // Charger la texture du paddle à partir de l'image
+            GameConfig.SetTexturePaddle(Raylib.LoadTextureFromImage(paddleImage));
+            // Décharger l'image du paddle
+            Raylib.UnloadImage(paddleImage);
+
             _sceneManager = new SceneManager();
             _sceneManager.AddScene("first level", new SceneOne());
             _sceneManager.AddScene("second level", new SceneTwo());
 
             _sceneManager.LoadScene("first level");
+
+
 
             _sceneManager.Start();
 
@@ -42,8 +54,33 @@ namespace Experimenting2D
                 Draw();
             }
 
+            Raylib.UnloadTexture(GameConfig.PaddleTexture);
             Raylib.UnloadFont(_boldFont);
             Raylib.CloseWindow();
+        }
+
+        private void Initialize()
+        {
+            Raylib.InitWindow(GameConfig.ScreenWidth, GameConfig.ScreenHeight, GameConfig.Title);
+            Raylib.SetTargetFPS(GameConfig.TargetFPS);
+
+            _boldFont = Raylib.LoadFont("resources/fonts/bold.ttf");
+
+            _sceneManager = new SceneManager();
+            _sceneManager.AddScene("first level", new SceneOne());
+            _sceneManager.AddScene("second level", new SceneTwo());
+            _sceneManager.LoadScene("first level");
+
+            LoadPaddleTexture();
+            _sceneManager.Start();
+        }
+
+        private void LoadPaddleTexture()
+        {
+            Image image = Raylib.LoadImage(GameConfig.PADDLE_TEXTURE);
+            Raylib.ImageResize(ref image, 80, 20);
+            GameConfig.PaddleTexture = Raylib.LoadTextureFromImage(image);
+            Raylib.UnloadImage(image);
         }
 
         private void Update()
@@ -82,7 +119,7 @@ namespace Experimenting2D
             {
                 _sceneManager.Update(deltaTime);
                 _playerLoose = CheckPlayerLost();
-                _canGoNextLevel = CheckPlayerWon();
+                _canGoNextLevel = CanLoadNextLevel();
             }
         }
 
@@ -94,14 +131,10 @@ namespace Experimenting2D
             _sceneManager.Draw();
 
             if (_playerLoose)
-            {
                 DrawRestartText();
-            }
 
             if (_isPaused)
-            {
                 DrawPausedText();
-            }
 
             Raylib.EndDrawing();
         }
@@ -117,11 +150,8 @@ namespace Experimenting2D
             int posX = screenWidth / 2 - (int)textWidth / 2;
             int posY = screenHeight / 2 - (int)fontSize / 2;
 
-            // Draw the semi-transparent background
             int padding = 10;
             Raylib.DrawRectangle(posX - padding, posY - padding, (int)textWidth + padding * 2, (int)fontSize + padding * 2, new Color(0, 0, 0, 200));
-
-            // Draw the text
             Raylib.DrawTextEx(_boldFont, message, new Vector2(posX, posY), fontSize, 1, Color.Red);
         }
 
@@ -136,35 +166,27 @@ namespace Experimenting2D
             int posX = screenWidth / 2 - (int)textWidth / 2;
             int posY = screenHeight / 2 - (int)fontSize / 2;
 
-            // Draw the semi-transparent background
             int padding = 10;
             Raylib.DrawRectangle(posX - padding, posY - padding, (int)textWidth + padding * 2, (int)fontSize + padding * 2, new Color(0, 0, 0, 200));
-
-            // Draw the text
             Raylib.DrawTextEx(_boldFont, message, new Vector2(posX, posY), fontSize, 1, Color.Red);
         }
 
         private bool CheckPlayerLost()
         {
-            if (_sceneManager.GetCurrentScene() is null)
-                return false;
-
-            Scene scene = _sceneManager.GetCurrentScene();
-            if (scene != null)
-                return scene.HasPlayerLost();
-
-            return false;
+            Scene currentScene = _sceneManager.GetCurrentScene();
+            return currentScene != null && currentScene.HasPlayerLost();
         }
 
-        private bool CheckPlayerWon()
+        private bool CanLoadNextLevel()
         {
-            Scene scene = _sceneManager.GetCurrentScene();
-            if (scene != null)
-            {
-                return scene.HasDestroyAllTarget();
-            }
+            Scene currentScene = _sceneManager.GetCurrentScene();
+            return currentScene != null && currentScene.HasDestroyAllTarget();
+        }
 
-            return false;
+        private void UnloadAssets()
+        {
+            Raylib.UnloadTexture(GameConfig.PaddleTexture);
+            Raylib.UnloadFont(_boldFont);
         }
     }
 }

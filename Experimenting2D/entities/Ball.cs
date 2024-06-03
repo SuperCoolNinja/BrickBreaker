@@ -66,7 +66,6 @@ namespace Experimenting2D.entities
             _pos.Y = nextPosY;
 
             CheckCollisionWithTargets();
-            CheckCollisionWithPaddle();
 
             foreach (var particle in particles)
                 particle.Update();
@@ -92,24 +91,9 @@ namespace Experimenting2D.entities
                 if (IsCollidingWithTarget(targetPos))
                 {
                     _targetPositions.RemoveAt(i);
-                    //_dir.Y *= -1;
+                    //_dir.Y *= -1; // collision on target bounce good for destroyable target.
                     break;
                 }
-            }
-        }
-
-        private void CheckCollisionWithPaddle()
-        {
-            if (_paddle == null)
-                return;
-
-            if (IsCollidingWithPaddle())
-            {
-                _dir.Y *= -1;
-                float paddleCenter = _paddle.GetPos().X + _paddle.GetWidth() / 2;
-                float hitPos = (_pos.X - paddleCenter) / (_paddle.GetWidth() / 2);
-                _dir.X = hitPos;
-                CreateSmoke(_pos, particles, random);
             }
         }
 
@@ -118,10 +102,19 @@ namespace Experimenting2D.entities
             return _pos.Y > _screenHeight - RADIUS;
         }
 
-        private bool IsCollidingWithPaddle()
+        public bool IsCollidingWithPaddle()
         {
             return _pos.X + RADIUS > _paddle.GetPos().X && _pos.X - RADIUS < _paddle.GetPos().X + _paddle.GetWidth() &&
                    _pos.Y + RADIUS > _paddle.GetPos().Y && _pos.Y - RADIUS < _paddle.GetPos().Y + _paddle.GetWidth();
+        }
+
+        public void BounceOffPaddle(Paddle paddle)
+        {
+            _dir.Y *= -1;
+            float paddleCenter = _paddle.GetPos().X + _paddle.GetWidth() / 2;
+            float hitPos = (_pos.X - paddleCenter) / (_paddle.GetWidth() / 2);
+            _dir.X = hitPos;
+            CreateSmoke(_pos, particles, random);
         }
 
         private void CreateSmoke(Vector2 paddlePosition, List<Particle> particles, Random random)

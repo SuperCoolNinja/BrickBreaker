@@ -47,6 +47,16 @@ internal class SceneTwo : Scene
         _paddle.Update(deltaTime);
         _target.Update(deltaTime);
         _ball.Update(deltaTime);
+
+        CheckBallPaddleCollision();
+    }
+
+    private void CheckBallPaddleCollision()
+    {
+        if (_ball.IsCollidingWithPaddle())
+        {
+            _ball.BounceOffPaddle(_paddle);
+        }
     }
 
     public override bool HasPlayerLost()
